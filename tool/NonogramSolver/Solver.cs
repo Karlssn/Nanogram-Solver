@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using NonogramSolver.Data;
+using System.Collections.Generic;
 using System.Linq;
-using NonogramSolver.Data;
 
 namespace NonogramSolver;
 
@@ -15,7 +15,7 @@ public static class Solver
         {
             foreach (var job in jobList.Keys)
             {
-                if (job.State != RowState.Completedd)
+                if (job.State != RowState.Completed)
                 {
                     var patternset = GenerateAllPatternSet(job, job.Clues);
                     var overlappingIndex = RetriveOverlapping(job, patternset);
@@ -45,7 +45,7 @@ public static class Solver
         }
         else if (total == job.Cells.Count)
         {
-            job.State = RowState.Completedd;
+            job.State = RowState.Completed;
         }
         else
         {
@@ -248,7 +248,7 @@ public static class Solver
             {
                 row.Cells[i].State = CellState.Fill;
             }
-            row.State = RowState.Completedd;
+            row.State = RowState.Completed;
 
             return;
         }

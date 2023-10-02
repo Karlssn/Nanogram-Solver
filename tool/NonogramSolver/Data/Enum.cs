@@ -2,14 +2,14 @@
 
 public enum CellState
 {
-    Fill,
-    Cross,
-    Empty
+    Empty = 0,
+    Fill = 1,
+    Cross = 2,
 }
 
 public enum RowState
 {
     Empty,
     Started,
-    Completedd
+    Completed
 }
