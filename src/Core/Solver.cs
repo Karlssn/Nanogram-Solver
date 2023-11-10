@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NonogramSolver;
+namespace NonogramSolver.Core;
 
 public static class Solver
 {

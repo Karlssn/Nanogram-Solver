@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34024.191
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NonogramSolver", "tool\NonogramSolver\NonogramSolver.csproj", "{C375502C-A0A9-44C2-8F48-9375D7D36BF1}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nonogram-Solver.Test", "test\Nonogram-Solver.Test\Nonogram-Solver.Test.csproj", "{210578EC-A751-446A-BCE1-5ED1A6E49691}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{121D72DA-8E24-4C9D-AB7E-FB8387182051}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{E2EADBE5-BE4F-4CF6-9DB5-288DA02247FB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{90B49ACC-CDE8-41A2-B3C7-C8511913A11B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend", "src\Backend\Backend.csproj", "{7D06449D-AEFE-4DD2-9651-506B5C462012}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "src\Core\Core.csproj", "{C02E0930-9A2A-403F-AADC-1D6C5B9EBA29}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,23 +19,25 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C375502C-A0A9-44C2-8F48-9375D7D36BF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C375502C-A0A9-44C2-8F48-9375D7D36BF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C375502C-A0A9-44C2-8F48-9375D7D36BF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C375502C-A0A9-44C2-8F48-9375D7D36BF1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{210578EC-A751-446A-BCE1-5ED1A6E49691}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{210578EC-A751-446A-BCE1-5ED1A6E49691}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{210578EC-A751-446A-BCE1-5ED1A6E49691}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{210578EC-A751-446A-BCE1-5ED1A6E49691}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D06449D-AEFE-4DD2-9651-506B5C462012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D06449D-AEFE-4DD2-9651-506B5C462012}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D06449D-AEFE-4DD2-9651-506B5C462012}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D06449D-AEFE-4DD2-9651-506B5C462012}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C02E0930-9A2A-403F-AADC-1D6C5B9EBA29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C02E0930-9A2A-403F-AADC-1D6C5B9EBA29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C02E0930-9A2A-403F-AADC-1D6C5B9EBA29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C02E0930-9A2A-403F-AADC-1D6C5B9EBA29}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{C375502C-A0A9-44C2-8F48-9375D7D36BF1} = {90B49ACC-CDE8-41A2-B3C7-C8511913A11B}
 		{210578EC-A751-446A-BCE1-5ED1A6E49691} = {E2EADBE5-BE4F-4CF6-9DB5-288DA02247FB}
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {29493E13-5AEB-45F5-AF82-FEAB37F32CBF}
+		{7D06449D-AEFE-4DD2-9651-506B5C462012} = {121D72DA-8E24-4C9D-AB7E-FB8387182051}
+		{C02E0930-9A2A-403F-AADC-1D6C5B9EBA29} = {121D72DA-8E24-4C9D-AB7E-FB8387182051}
 	EndGlobalSection
 EndGlobal
