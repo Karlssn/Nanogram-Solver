@@ -2,31 +2,33 @@
 
 namespace NonogramSolver.Data;
 
-public class Row
+public class Line
 {
     public List<Cell> Cells { get; set; }
-    public RowState State { get; set; }
+    public LineState State { get; set; }
     public List<int> Clues { get; set; }
 
-    public Row()
+    public Line()
     {
-        Cells = new List<Cell>();
-        State = new RowState();
+        Cells = [];
+        State = new LineState();
+        Clues = [];
     }
 
-    public Row(int size)
+    private Line(int size)
     {
-        Cells = new List<Cell>();
-        State = RowState.Empty;
+        Cells = [];
+        State = LineState.Empty;
         for (int i = 0; i < size; i++)
         {
             Cells.Add(new Cell());
         }
+        Clues = [];
     }
 
-    public Row Clone()
+    public Line Clone()
     {
-        var clone = new Row(Cells.Count);
+        var clone = new Line(Cells.Count);
         for (int i = 0; i < Cells.Count; i++)
         {
             clone.Cells[i].State = Cells[i].State;
