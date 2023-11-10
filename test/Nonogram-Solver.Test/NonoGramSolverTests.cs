@@ -8,6 +8,53 @@ namespace NonogramSolver.Test;
 public class NonogramSolverTests
 {
     [Test]
+    public void Solve_ExtraZeroColumn_ValidMatrix()
+    {
+        // Arrange
+        var cluesRow = new List<List<int>>
+        {
+            new() { 1 },
+            new() { 0 },
+            new() { 1 },
+        };
+
+        var cluesCol = new List<List<int>>
+        {
+            new() { 1,0,1 },
+            new() { 0 },
+            new() { 0 },
+        };
+        var size = 3;
+        Matrix matrix = new(size, cluesRow, cluesCol);
+
+        var jsonSolution =
+            """
+[
+    { "State":1},{ "State":2},{ "State":2},
+    { "State":2},{ "State":2},{ "State":2},
+    { "State":1},{ "State":2},{ "State":2}
+]
+""";
+
+        List<Cell> solution = JsonSerializer.Deserialize<List<Cell>>(jsonSolution) ?? throw new ArgumentException();
+
+        // Act
+        Solver.Solve(size, matrix);
+        foreach (var (item, i) in matrix.AllCells.Select((x, i) => (x.State, i)))
+        {
+            Console.Write(item);
+            if (i % size == size - 1)
+            {
+                Console.WriteLine("");
+            }
+        }
+        DrawBoard(size, matrix);
+
+        // Assert
+        Assert.AreEqual(solution.Select(x => (int)x.State), matrix.AllCells.Select(x => (int)x.State));
+    }
+
+    [Test]
     public void Solve_TheDuck_ValidMatrix()
     {
         // Arrange
@@ -60,7 +107,7 @@ public class NonogramSolverTests
         DrawBoard(size, matrix);
 
         // Assert
-        Assert.AreEqual(solution.Select(x => ((int)x.State)), matrix.AllCells.Select(x => ((int)x.State)));
+        Assert.AreEqual(solution.Select(x => (int)x.State), matrix.AllCells.Select(x => (int)x.State));
     }
 
     [Test]
@@ -136,7 +183,7 @@ public class NonogramSolverTests
         DrawBoard(size, matrix);
 
         // Arrange
-        Assert.AreEqual(solution.Select(x => ((int)x.State)), matrix.AllCells.Select(x => ((int)x.State)));
+        Assert.AreEqual(solution.Select(x => (int)x.State), matrix.AllCells.Select(x => (int)x.State));
     }
 
     private static void DrawBoard(int size, Matrix m)
