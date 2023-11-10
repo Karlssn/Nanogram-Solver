@@ -7,7 +7,7 @@ public enum CellState
     Cross = 2,
 }
 
-public enum RowState
+public enum LineState
 {
     Empty,
     Started,

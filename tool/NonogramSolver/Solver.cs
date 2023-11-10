@@ -1,293 +1,260 @@
 ﻿using NonogramSolver.Data;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 
 namespace NonogramSolver;
 
 public static class Solver
 {
-    public static void Solve(int size, Matrix matrix)
+    public static void Solve(Matrix matrix)
     {
-        var jobList = FillJoblist(matrix, size);
-
-        var jobs = jobList.Keys.ToList();
-        while (jobs.Count > 0)
+        var running = true;
+        while (running)
         {
-            foreach (var job in jobList.Keys)
+            foreach (var line in matrix.Columns.Concat(matrix.Rows))
             {
-                if (job.State != RowState.Completed)
-                {
-                    var patternset = GenerateAllPatternSet(job, job.Clues);
-                    var overlappingIndex = RetriveOverlapping(job, patternset);
-                    Fill(overlappingIndex, job);
-                    SetRowState(job);
-                }
-                else
-                {
-                    jobs.Remove(job);
-                }
+                var patternSet = GenerateAllPatternSet(line);
+                var (fill, cross) = GetIntersectedPatternSet(line, patternSet)
+                    ?? SetFillOrCross(line.Cells.Count, line.Clues.Sum());
+
+                UpdateLine(line, fill, cross);
             }
+
+            running = matrix.Columns
+                .Concat(matrix.Rows)
+                .Any(x => x.State != LineState.Completed);
         }
     }
 
-    private static int SetRowState(Row job)
+    private static List<List<int>>? GenerateAllPatternSet(Line line)
     {
-        // Extract method
-        var filledCells = job.Cells.Select(x => x).Where(x => x.State == CellState.Fill).ToList();
-        var crossedCells = job.Cells.Select(x => x).Where(x => x.State == CellState.Cross).ToList();
-        var score = job.Clues.Sum() + (job.Clues.Count - 1) + crossedCells.Count() - filledCells.Count();
+        int size = line.Cells.Count;
+        int zeros = size - line.Clues.Sum();
+        var patternSet = RecursivePatternSet(zeros, size);
+        if (patternSet != null)
+        {
+            RemoveInvalidPatternSet(line, patternSet);
 
-        var total = filledCells.Count() + crossedCells.Count();
-
-        if (total < job.Cells.Count && total > 0)
-        {
-            job.State = RowState.Started;
-        }
-        else if (total == job.Cells.Count)
-        {
-            job.State = RowState.Completed;
-        }
-        else
-        {
-            job.State = RowState.Empty;
+            if (patternSet.Count == 0)
+            {
+                patternSet = null;
+            }
         }
 
-        return score;
+        return patternSet;
     }
 
-    private static Dictionary<Row, int> FillJoblist(Matrix m, int size)
+    private static List<List<int>>? RecursivePatternSet(int zeros, int size, List<int>? previous = null)
     {
-        var dic = new Dictionary<Row, int>();
-        for (int i = 0; i < size; i++)
+        if (zeros == 0)
         {
-            var colScore = size;
-            var rowScore = size;
-            if (m.Cols[i].Clues.Sum() > 0)
-            {
-                colScore = m.Cols[i].Clues.Sum() + m.Cols[i].Clues.Count - 1;
-            }
-            if (m.Rows[i].Clues.Sum() > 0)
-            {
-                rowScore = m.Rows[i].Clues.Sum() + m.Rows[i].Clues.Count - 1;
-            }
-            dic[m.Cols[i]] = colScore;
-            dic[m.Rows[i]] = rowScore;
+            return previous == null ? null : ([previous]);
         }
 
-        return dic;
-    }
-
-    private static List<List<int>> RetriveOverlapping(Row row, List<List<int>> patternset)
-    {
-        var fillIndex = new List<int>();
-        var crossIndex = new List<int>();
-        if (patternset == null) return null;
-
-        var initial = true;
-        foreach (var pattern in patternset)
+        var patternSet = new List<List<int>>();
+        for (int i = size - 1; i >= 0; i--)
         {
-            var temp = new Row();
-            temp = TestFill(pattern, row);
-            if (initial)
-            {
-                initial = false;
-                for (int j = 0; j < temp.Cells.Count; j++)
-                {
-                    if (temp.Cells[j].State == CellState.Fill)
-                    {
-                        fillIndex.Add(j);
-                    }
-                    else if (temp.Cells[j].State == CellState.Cross)
-                    {
-                        crossIndex.Add(j);
-                    }
-                }
-            }
-            else
-            {
-                for (int j = 0; j < temp.Cells.Count; j++)
-                {
-                    if (fillIndex.Contains(j))
-                    {
-                        if (temp.Cells[j].State != CellState.Fill)
-                        {
-                            fillIndex.Remove(j);
-                        }
-                    }
-                    else if (crossIndex.Contains(j))
-                    {
-                        if (temp.Cells[j].State != CellState.Cross)
-                        {
-                            crossIndex.Remove(j);
-                        }
-                    }
-
-                }
-            }
+            var current = previous == null ? [] : new List<int>(previous);
+            current.Add(i);
+            patternSet.AddRange(RecursivePatternSet(zeros - 1, i, current) ?? []);
         }
 
-        return new List<List<int>>() { fillIndex, crossIndex };
+        return patternSet;
     }
 
-    private static List<List<int>> GenerateAllPatternSet(Row row, List<int> clues)
-    {
-        int size = row.Cells.Count;
-        int zeros = size - clues.Sum();
-        var patternset = RecursivePatternSet(zeros, size);
-        if (patternset != null)
-        {
-            var removePattern = RemovePatternSet(row, clues, patternset);
-            removePattern.ForEach(p =>
-            {
-                if (patternset.Contains(p))
-                    patternset.Remove(p);
-            });
-            if (patternset.Count == 0)
-            {
-                patternset = null;
-            }
-        }
-
-        return patternset;
-    }
-
-    private static List<List<int>> RemovePatternSet(Row row, List<int> clues, List<List<int>> patternset)
+    private static void RemoveInvalidPatternSet(Line line, List<List<int>> patternSet)
     {
         var removePattern = new List<List<int>>();
-        foreach (var pattern in patternset)
+        foreach (var pattern in patternSet)
         {
-            var rowTemp = new Row();
             try
             {
-                rowTemp = TestFill(pattern, row);
+                var testLine = TestFillThrows(pattern, line);
+                ValidatePatternThrow(line, testLine);
             }
             catch (NonogramException)
             {
                 removePattern.Add(pattern);
-                continue;
-            }
-
-            // validate solution
-            var index = 0;
-            for (int i = 0; i < row.Cells.Count; i++)
-            {
-                if (rowTemp.Cells[i].State == CellState.Fill)
-                {
-                    // j ->
-                    var currentClue = clues[index];
-                    if (i + currentClue > row.Cells.Count)
-                    {
-                        i = 10000;
-                        removePattern.Add(pattern);
-                        break;
-                    }
-
-                    for (int j = i; j < i + currentClue; j++)
-                    {
-                        if (rowTemp.Cells[j].State != CellState.Fill)
-                        {
-                            i = j = 10000;
-                            removePattern.Add(pattern);
-                            break;
-                        }
-                    }
-                    i += currentClue - 1;
-                    // check if it is a filled block after the clues
-                    if (i + 1 < row.Cells.Count)
-                    {
-                        if (rowTemp.Cells[i + 1].State == CellState.Fill)
-                        {
-                            removePattern.Add(pattern);
-                            break;
-                        }
-                    }
-                    if (index < clues.Count - 1)
-                    {
-                        index++;
-                    }
-
-                }
             }
         }
 
-        return removePattern;
+        removePattern.ForEach(p => patternSet.Remove(p));
     }
 
-    private static Row TestFill(List<int> pattern, Row row)
+    private static Line TestFillThrows(List<int> pattern, Line line)
     {
-        int size = row.Cells.Count;
-        var clone = row.Clone();
-        for (int i = 0; i < size; i++)
+        int size = line.Cells.Count;
+        var clone = line.Clone();
+        foreach (var (cell, i) in clone.Cells.Select((c, i) => (c, i)))
         {
             if (!pattern.Contains(i))
             {
-                if (clone.Cells[i].State == CellState.Cross)
+                if (cell.State == CellState.Cross)
                 {
-                    throw new NonogramException("Failed to fill");
+                    throw new NonogramException("Failed to set fill");
                 }
-                clone.Cells[i].State = CellState.Fill;
+                cell.State = CellState.Fill;
             }
             else
             {
-                if (clone.Cells[i].State == CellState.Fill)
+                if (cell.State == CellState.Fill)
                 {
-                    throw new NonogramException("Failed to fill");
+                    throw new NonogramException("Failed to set cross");
                 }
-                clone.Cells[i].State = CellState.Cross;
+                cell.State = CellState.Cross;
             }
         }
 
         return clone;
     }
 
-    private static void Fill(List<List<int>> pattern, Row row)
+    private static void ValidatePatternThrow(Line line, Line testLine)
     {
-        if (pattern == null)
+        var clues = line.Clues;
+        var clueIndex = 0;
+        for (int i = 0; i < line.Cells.Count; i++)
         {
-            for (int i = 0; i < row.Cells.Count; i++)
+            if (testLine.Cells[i].State == CellState.Fill)
             {
-                row.Cells[i].State = CellState.Fill;
-            }
-            row.State = RowState.Completed;
+                var currentClue = clues[clueIndex];
 
-            return;
-        }
-        else
-        {
-            var fillPattern = pattern[0];
-            var crossPattern = pattern[1];
-            for (int i = 0; i < row.Cells.Count; i++)
-            {
-                if (fillPattern.Contains(i))
+                ValidateClueNotOutOfRangeThrows(line.Cells.Count, i, currentClue);
+
+                ValidateAllCellsInClueAreFilledThrows(testLine, i, currentClue);
+
+                i += currentClue - 1;
+
+                ValidateCellAfterClueIsNotFillThrows(testLine, line.Cells.Count, i);
+
+                if (clueIndex < clues.Count - 1)
                 {
-                    row.Cells[i].State = CellState.Fill;
-                }
-                if (crossPattern.Contains(i))
-                {
-                    row.Cells[i].State = CellState.Cross;
+                    clueIndex++;
                 }
             }
         }
     }
 
-    private static List<List<int>> RecursivePatternSet(int zeros, int size, List<int> before = null)
+    private static void ValidateCellAfterClueIsNotFillThrows(Line filledLine, int lineCount, int index)
     {
-        if (zeros == 0)
+        if (index + 1 < lineCount)
         {
-            if (before == null) return null;
-            var x = new List<List<int>>();
-            x.Add(before);
-
-            return x;
+            if (filledLine.Cells[index + 1].State == CellState.Fill)
+            {
+                throw new NonogramException("Cell after last clue can not be fill");
+            }
         }
-        var patternset = new List<List<int>>();
-        for (int i = size - 1; i >= 0; i--)
+    }
+
+    private static void ValidateAllCellsInClueAreFilledThrows(Line filledLine, int startIndex, int sizeOfClue)
+    {
+        for (int i = startIndex; i < startIndex + sizeOfClue; i++)
         {
-            var p = (before == null ? new List<int>() : new List<int>(before));
-            p.Add(i);
-            patternset.AddRange(RecursivePatternSet((zeros - 1), i, p));
+            if (filledLine.Cells[i].State != CellState.Fill)
+            {
+                throw new NonogramException("All clues must be filled");
+            }
+        }
+    }
+
+    private static void ValidateClueNotOutOfRangeThrows(int lineCount, int index, int clueSize)
+    {
+        if (index + clueSize > lineCount)
+        {
+            throw new NonogramException("Clues must be in range");
+        }
+    }
+
+    private static (List<int> FillIndexes, List<int> CrossIndexes)? GetIntersectedPatternSet(Line line, List<List<int>>? patternSet)
+    {
+        if (patternSet == null)
+        {
+            return null;
         }
 
-        return patternset;
+        List<int>? fillIndex = null;
+        List<int>? crossIndex = null;
+
+        foreach (var pattern in patternSet)
+        {
+            var testLine = TestFillThrows(pattern, line);
+            if (fillIndex is null || crossIndex is null)
+            {
+                fillIndex = GetIndicesFromState(testLine, CellState.Fill).ToList();
+                crossIndex = GetIndicesFromState(testLine, CellState.Cross).ToList();
+            }
+            else
+            {
+                fillIndex = fillIndex.Intersect(GetIndicesFromState(testLine, CellState.Fill)).ToList();
+                crossIndex = crossIndex.Intersect(GetIndicesFromState(testLine, CellState.Cross)).ToList();
+            }
+        }
+        if (fillIndex is null || crossIndex is null)
+        {
+            throw new NonogramException("Failed to intersect pattern set");
+        }
+
+        return (fillIndex, crossIndex);
+    }
+
+    private static IEnumerable<int> GetIndicesFromState(Line testLine, CellState state)
+    {
+        for (int i = 0; i < testLine.Cells.Count; i++)
+        {
+            if (testLine.Cells[i].State == state)
+            {
+                yield return i;
+            }
+        }
+    }
+
+    private static (List<int> FillIndexes, List<int> CrossIndexes) SetFillOrCross(int size, int clueSum)
+    {
+        var allValues = Enumerable.Range(0, size).ToList();
+
+        return clueSum == 0
+            ? (new List<int>(), allValues)
+            : (allValues, new List<int>());
+    }
+
+    private static void UpdateLine(Line line, List<int> fill, List<int> cross)
+    {
+        fill.ForEach(i =>
+            line.Cells[i].State = CellState.Fill
+        );
+        cross.ForEach(i =>
+            line.Cells[i].State = CellState.Cross
+        );
+
+        SetLineState(line);
+    }
+
+    private static void SetLineState(Line line)
+    {
+        var numberOfFilledCells = line.Cells
+            .Select(x => x)
+            .Where(x => x.State == CellState.Fill)
+            .Count();
+
+        var numberOfCrossedCells = line.Cells
+            .Select(x => x)
+            .Where(x => x.State == CellState.Cross)
+            .Count();
+
+        var total = numberOfFilledCells + numberOfCrossedCells;
+
+        if (total < line.Cells.Count && total > 0)
+        {
+            line.State = LineState.Started;
+        }
+        else if (total == line.Cells.Count)
+        {
+            line.State = LineState.Completed;
+        }
+        else
+        {
+            line.State = LineState.Empty;
+        }
     }
 }

@@ -11,21 +11,21 @@ public class NonogramSolverTests
     public void Solve_ExtraZeroColumn_ValidMatrix()
     {
         // Arrange
-        var cluesRow = new List<List<int>>
+        var rowClues = new List<List<int>>
         {
             new() { 1 },
             new() { 0 },
             new() { 1 },
         };
 
-        var cluesCol = new List<List<int>>
+        var columnClues = new List<List<int>>
         {
             new() { 1,0,1 },
             new() { 0 },
             new() { 0 },
         };
         var size = 3;
-        Matrix matrix = new(size, cluesRow, cluesCol);
+        Matrix matrix = new(size, rowClues, columnClues);
 
         var jsonSolution =
             """
@@ -39,7 +39,7 @@ public class NonogramSolverTests
         List<Cell> solution = JsonSerializer.Deserialize<List<Cell>>(jsonSolution) ?? throw new ArgumentException();
 
         // Act
-        Solver.Solve(size, matrix);
+        Solver.Solve(matrix);
         foreach (var (item, i) in matrix.AllCells.Select((x, i) => (x.State, i)))
         {
             Console.Write(item);
@@ -58,7 +58,7 @@ public class NonogramSolverTests
     public void Solve_TheDuck_ValidMatrix()
     {
         // Arrange
-        var cluesRow = new List<List<int>>
+        var rowClues = new List<List<int>>
         {
             new() { 3 },
             new() { 2, 1 },
@@ -71,7 +71,7 @@ public class NonogramSolverTests
             new() { 2 },
         };
 
-        var cluesCol = new List<List<int>>
+        var columnClues = new List<List<int>>
         {
             new() { 1,2 },
             new() { 3,1 },
@@ -84,7 +84,7 @@ public class NonogramSolverTests
             new() { 0 },
         };
         var size = 9;
-        Matrix matrix = new(size, cluesRow, cluesCol);
+        Matrix matrix = new(size, rowClues, columnClues);
 
         var jsonSolution =
             """
@@ -103,7 +103,7 @@ public class NonogramSolverTests
         List<Cell> solution = JsonSerializer.Deserialize<List<Cell>>(jsonSolution) ?? throw new ArgumentException();
 
         // Act
-        Solver.Solve(size, matrix);
+        Solver.Solve(matrix);
         DrawBoard(size, matrix);
 
         // Assert
@@ -114,7 +114,7 @@ public class NonogramSolverTests
     public void Solve_15by15_ValidMatrix()
     {
         // Arrange
-        var cluesRow = new List<List<int>>
+        var rowClues = new List<List<int>>
         {
             new() { 2 },
             new() { 3 },
@@ -133,7 +133,7 @@ public class NonogramSolverTests
             new() { 1,4,6},
         };
 
-        var cluesCol = new List<List<int>>
+        var columnClues = new List<List<int>>
         {
             new() { 2,4},
             new() { 2,4},
@@ -153,7 +153,7 @@ public class NonogramSolverTests
         };
         var size = 15;
 
-        Matrix matrix = new(size, cluesRow, cluesCol);
+        Matrix matrix = new(size, rowClues, columnClues);
 
         var jsonSolution =
             """
@@ -179,7 +179,7 @@ public class NonogramSolverTests
         List<Cell> solution = JsonSerializer.Deserialize<List<Cell>>(jsonSolution) ?? throw new ArgumentException();
 
         // Act
-        Solver.Solve(size, matrix);
+        Solver.Solve(matrix);
         DrawBoard(size, matrix);
 
         // Arrange
