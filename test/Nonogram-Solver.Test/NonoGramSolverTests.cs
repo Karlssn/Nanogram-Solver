@@ -1,4 +1,5 @@
-﻿using NonogramSolver.Data;
+﻿using NonogramSolver.Core;
+using NonogramSolver.Data;
 using NUnit.Framework;
 using System.Text.Json;
 
