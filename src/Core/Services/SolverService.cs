@@ -20,8 +20,8 @@ public class SolverService : ISolverService
             .ValidateAndThrowAsync(input);
 
         var matrix = new Matrix(input.Size, input.RowClues, input.ColClues);
-        Solver.Solve(input.Size, matrix);
-        return matrix.Cols
+        Solver.Solve(matrix);
+        return matrix.Columns
             .Select(col => col.Cells
                 .Select(x => x.State == CellState.Fill ? CellEnumDto.Filled : CellEnumDto.Cross)
                 .ToList())
