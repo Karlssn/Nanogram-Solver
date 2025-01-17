@@ -51,7 +51,7 @@ public class NonogramSolverTests
         DrawBoard(size, matrix);
 
         // Assert
-        Assert.AreEqual(solution.Select(x => (int)x.State), matrix.AllCells.Select(x => (int)x.State));
+        Assert.That(solution.Select(x => (int)x.State), Is.EqualTo(matrix.AllCells.Select(x => (int)x.State)));
     }
 
     [Test]
@@ -107,7 +107,7 @@ public class NonogramSolverTests
         DrawBoard(size, matrix);
 
         // Assert
-        Assert.AreEqual(solution.Select(x => (int)x.State), matrix.AllCells.Select(x => (int)x.State));
+        Assert.That(solution.Select(x => (int)x.State), Is.EqualTo(matrix.AllCells.Select(x => (int)x.State)));
     }
 
     [Test]
@@ -183,7 +183,7 @@ public class NonogramSolverTests
         DrawBoard(size, matrix);
 
         // Arrange
-        Assert.AreEqual(solution.Select(x => (int)x.State), matrix.AllCells.Select(x => (int)x.State));
+        Assert.That(solution.Select(x => (int)x.State), Is.EqualTo(matrix.AllCells.Select(x => (int)x.State)));
     }
 
     private static void DrawBoard(int size, Matrix m)
